@@ -3,70 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Receptenmanager</title>
+    <title>Recepten Ingrediënten Selector</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Receptenmanager</h1>
-        
-        <div class="card">
-            <h2>Nieuw recept toevoegen</h2>
-            <div class="form-group">
-                <label for="recipe-name">Receptnaam:</label>
-                <input type="text" id="recipe-name" placeholder="Voer receptnaam in">
-            </div>
-            
-            <h3>Ingrediënten:</h3>
-            <div id="ingredients-container">
-                <!-- Ingredient fields will be added here dynamically -->
-                <div class="ingredient-row">
-                    <input type="text" class="ingredient-input" placeholder="Voer ingrediënt in">
-                </div>
-                <div class="ingredient-row">
-                    <input type="text" class="ingredient-input" placeholder="Voer ingrediënt in">
-                </div>
-                <div class="ingredient-row">
-                    <input type="text" class="ingredient-input" placeholder="Voer ingrediënt in">
-                </div>
-                <div class="ingredient-row">
-                    <input type="text" class="ingredient-input" placeholder="Voer ingrediënt in">
-                </div>
-                <div class="ingredient-row">
-                    <input type="text" class="ingredient-input" placeholder="Voer ingrediënt in">
-                </div>
-            </div>
-            
-            <button id="add-recipe-btn" class="btn primary-btn">Recept Toevoegen</button>
+        <!-- Link to main recipe page -->
+        <div class="main-link-container">
+            <a href="{{ url_for('recipe_manager') }}" class="main-link">Naar Recepten Beheer</a>
         </div>
-        
-        <div class="card">
-            <h2>Recepten</h2>
-            <div id="recipes-container">
-                <!-- Recipes will be displayed here -->
-                {% if recipes %}
-                    {% for recipe in recipes %}
-                        <div class="recipe-item" data-index="{{ loop.index0 }}">
-                            <h3>{{ recipe.name }}</h3>
-                            <ul>
-                                {% for ingredient in recipe.ingredients %}
-                                    <li>{{ ingredient }}</li>
-                                {% endfor %}
-                            </ul>
-                            <button class="delete-btn">×</button>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <p>Nog geen recepten toegevoegd.</p>
-                {% endif %}
-            </div>
-            
-            <button id="save-db-btn" class="btn success-btn">Alles Opslaan in Database</button>
-            <br><br>
-            <a href="{{ url_for('view_db') }}" class="btn primary-btn">Database Bekijken</a>
+
+        <h1>Recepten Ingrediënten Selector</h1>
+
+        <!-- Recipe buttons container -->
+        <div class="recipe-buttons-container">
+            {% for recipe in recipes %}
+            <button class="recipe-button" data-recipe-id="{{ recipe.id }}" data-recipe-name="{{ recipe.name }}">
+                {{ recipe.name }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <!-- Ingredients text area -->
+        <div class="ingredients-container">
+            <textarea id="ingredients-text" readonly placeholder="Geselecteerde recept ingrediënten verschijnen hier..."></textarea>
+            <button id="copy-button" class="copy-button">Kopieer Ingrediënten</button>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const recipeButtons = document.querySelectorAll('.recipe-button');
+        const ingredientsText = document.getElementById('ingredients-text');
+        const copyButton = document.getElementById('copy-button');
+        let selectedRecipes = new Set();
+
+        // Generate random gradient colors for buttons
+        function getRandomGradient() {
+            const colors = [
+                '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
+                '#D4A5A5', '#9B59B6', '#3498DB', '#E67E22', '#2ECC71'
+            ];
+            const color1 = colors[Math.floor(Math.random() * colors.length)];
+            const color2 = colors[Math.floor(Math.random() * colors.length)];
+            return `linear-gradient(45deg, ${color1}, ${color2})`;
+        }
+
+        // Apply random gradients to buttons
+        recipeButtons.forEach(button => {
+            button.style.background = getRandomGradient();
+        });
+
+        // Toggle button state and update ingredients
+        recipeButtons.forEach(button => {
+            button.addEventListener('click', async function() {
+                const recipeId = this.dataset.recipeId;
+                const recipeName = this.dataset.recipeName;
+                
+                if (selectedRecipes.has(recipeId)) {
+                    selectedRecipes.delete(recipeId);
+                    this.classList.remove('selected');
+                } else {
+                    selectedRecipes.add(recipeId);
+                    this.classList.add('selected');
+                }
+
+                // Fetch ingredients for selected recipes
+                if (selectedRecipes.size > 0) {
+                    try {
+                        const response = await fetch('/get_ingredients', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                recipe_ids: Array.from(selectedRecipes)
+                            })
+                        });
+                        const data = await response.json();
+                        ingredientsText.value = data.ingredients.join('\n');
+                    } catch (error) {
+                        console.error('Error fetching ingredients:', error);
+                    }
+                } else {
+                    ingredientsText.value = '';
+                }
+            });
+        });
+
+        // Copy button functionality
+        copyButton.addEventListener('click', function() {
+            ingredientsText.select();
+            document.execCommand('copy');
+            this.textContent = 'Gekopieerd!';
+            setTimeout(() => {
+                this.textContent = 'Kopieer Ingrediënten';
+            }, 2000);
+        });
+    });
+    </script>
 </body>
 </html>

@@ -113,11 +113,39 @@ def get_default_ingredients(recipe_name):
     # If no exact match is found, return None
     return None
 
-# Routes
+def get_all_recipes():
+    """Helper function to get all recipes from database"""
+    if __name__ == "__main__":  # Development mode
+        print("Running in development mode - using mock data")
+        return [], None
+    
+    conn, error = get_db_connection()
+    if error:
+        return None, error
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute('SELECT id, name FROM recipes ORDER BY name')
+        recipes = cursor.fetchall()
+        return recipes, None
+    except mysql.connector.Error as err:
+        return None, str(err)
+    finally:
+        cursor.close()
+        conn.close()
+
 @app.route('/')
 def index():
-    recipes = get_recipes()
-    return render_template('index.html', recipes=recipes)
+    """Default route - shows recipe selector"""
+    recipes, error = get_all_recipes()
+    if error:
+        return render_template('error.html', error=error)
+    return render_template('index.html', recipes=recipes or [])
+
+@app.route('/manager')
+def recipe_manager():
+    """Route for the recipe manager page"""
+    return render_template('manager.html')
 
 @app.route('/add_recipe', methods=['POST'])
 def add_recipe():
@@ -143,8 +171,9 @@ def delete_recipe(index):
 def save_to_db():
     recipes = get_recipes()
     
-    if not recipes:
-        return jsonify({'success': False, 'error': 'No recipes to save'})
+    if __name__ == "__main__":
+        print("Running in development mode - skipping database operations")
+        return jsonify({'success': True, 'message': 'Development mode - database operations skipped'})
     
     try:
         conn, error = get_db_connection()
@@ -180,6 +209,11 @@ def default_ingredients_route():
 
 @app.route('/view_db')
 def view_db():
+    
+    if __name__ == "__main__":
+        print("Running in development mode - skipping database operations")
+        return jsonify({'success': True, 'message': 'Development mode - database operations skipped'})
+    
     try:
         conn, error = get_db_connection()
         if error:
@@ -208,7 +242,42 @@ def view_db():
         print(f"Unexpected error: {e}")
         return f"Error: {str(e)}"
 
+@app.route('/get_ingredients', methods=['POST'])
+def get_ingredients():
+    """API endpoint to get ingredients for selected recipes"""
+
+    if __name__ == "__main__":
+        print("Running in development mode - skipping database operations")
+        return jsonify({'success': True, 'message': 'Development mode - database operations skipped'})
+    
+    conn, error = get_db_connection()
+    if error:
+        return jsonify({'error': error}), 500
+    
+    try:
+        recipe_ids = request.json.get('recipe_ids', [])
+        if not recipe_ids:
+            return jsonify({'ingredients': []})
+        
+        cursor = conn.cursor(dictionary=True)
+        # Use parameterized query to prevent SQL injection
+        placeholders = ', '.join(['%s'] * len(recipe_ids))
+        query = f'''
+            SELECT DISTINCT i.name 
+            FROM ingredients i 
+            JOIN recipe_ingredients ri ON i.id = ri.ingredient_id 
+            WHERE ri.recipe_id IN ({placeholders})
+            ORDER BY i.name
+        '''
+        cursor.execute(query, recipe_ids)
+        ingredients = [row['name'] for row in cursor.fetchall()]
+        return jsonify({'ingredients': ingredients})
+    except mysql.connector.Error as err:
+        return jsonify({'error': str(err)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 if __name__ == '__main__':
-    init_db()
     init_json()
     app.run(debug=True, host='0.0.0.0', port=8080)

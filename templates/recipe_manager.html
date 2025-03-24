@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receptenmanager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Link to selector page -->
+        <div class="main-link-container">
+            <a href="{{ url_for('recipe_selector') }}" class="main-link">← Naar recepten selector</a>
+        </div>
+
+        <h1>Receptenmanager</h1>
+        
+        <div class="card">
+            <h2>Nieuw recept toevoegen</h2>
+            <div class="form-group">
+                <label for="recipe-name">Receptnaam:</label>
+                <input type="text" id="recipe-name" placeholder="Voer receptnaam in">
+            </div>
+            
+            <h3>Ingrediënten:</h3>
+            <div id="ingredients-container">
+                <!-- Ingredient fields will be added here dynamically -->
+                <div class="ingredient-row">
+                    <input type="text" class="ingredient-input" placeholder="Voer ingrediënt in">
+                </div>
+                <div class="ingredient-row">
+                    <input type="text" class="ingredient-input" placeholder="Voer ingrediënt in">
+                </div>
+                <div class="ingredient-row">
+                    <input type="text" class="ingredient-input" placeholder="Voer ingrediënt in">
+                </div>
+                <div class="ingredient-row">
+                    <input type="text" class="ingredient-input" placeholder="Voer ingrediënt in">
+                </div>
+                <div class="ingredient-row">
+                    <input type="text" class="ingredient-input" placeholder="Voer ingrediënt in">
+                </div>
+            </div>
+            
+            <button id="add-recipe-btn" class="btn primary-btn">Recept Toevoegen</button>
+        </div>
+        
+        <div class="card">
+            <h2>Recepten</h2>
+            <div id="recipes-container">
+                <!-- Recipes will be displayed here -->
+                {% if recipes %}
+                    {% for recipe in recipes %}
+                        <div class="recipe-item" data-index="{{ loop.index0 }}">
+                            <h3>{{ recipe.name }}</h3>
+                            <ul>
+                                {% for ingredient in recipe.ingredients %}
+                                    <li>{{ ingredient }}</li>
+                                {% endfor %}
+                            </ul>
+                            <button class="delete-btn">×</button>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Nog geen recepten toegevoegd.</p>
+                {% endif %}
+            </div>
+            
+            <button id="save-db-btn" class="btn success-btn">Alles Opslaan in Database</button>
+            <br><br>
+            <a href="{{ url_for('view_db') }}" class="btn primary-btn">Database Bekijken</a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
