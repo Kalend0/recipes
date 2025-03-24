@@ -142,10 +142,11 @@ def index():
         return render_template('error.html', error=error)
     return render_template('index.html', recipes=recipes or [])
 
-@app.route('/manager')
+@app.route('/recipe_manager')
 def recipe_manager():
     """Route for the recipe manager page"""
-    return render_template('manager.html')
+    recipes = get_recipes()
+    return render_template('recipe_manager.html', recipes=recipes)
 
 @app.route('/add_recipe', methods=['POST'])
 def add_recipe():
