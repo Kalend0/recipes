@@ -246,38 +246,51 @@ def view_db():
 @app.route('/get_ingredients', methods=['POST'])
 def get_ingredients():
     """API endpoint to get ingredients for selected recipes"""
-
-    if __name__ == "__main__":
-        print("Running in development mode - skipping database operations")
-        return jsonify({'success': True, 'message': 'Development mode - database operations skipped'})
     
-    conn, error = get_db_connection()
-    if error:
-        return jsonify({'error': error}), 500
+    # Check if running in development mode
+    if __name__ == "__main__":
+        print("Running in development mode - using mock data")
+        return jsonify({
+            'success': True,
+            'ingredients': ['Mock ingredient 1', 'Mock ingredient 2', 'Mock ingredient 3']
+        })
     
     try:
-        recipe_ids = request.json.get('recipe_ids', [])
-        if not recipe_ids:
-            return jsonify({'ingredients': []})
+        data = request.get_json()
+        recipe_ids = data.get('recipe_ids', [])
         
+        conn, error = get_db_connection()
+        if error:
+            return jsonify({'success': False, 'error': error}), 500
+            
         cursor = conn.cursor(dictionary=True)
-        # Use parameterized query to prevent SQL injection
-        placeholders = ', '.join(['%s'] * len(recipe_ids))
-        query = f'''
-            SELECT DISTINCT i.name 
-            FROM ingredients i 
-            JOIN recipe_ingredients ri ON i.id = ri.ingredient_id 
-            WHERE ri.recipe_id IN ({placeholders})
-            ORDER BY i.name
-        '''
-        cursor.execute(query, recipe_ids)
-        ingredients = [row['name'] for row in cursor.fetchall()]
-        return jsonify({'ingredients': ingredients})
-    except mysql.connector.Error as err:
-        return jsonify({'error': str(err)}), 500
-    finally:
+        
+        cursor.execute(
+            'SELECT ingredients FROM recipes WHERE id IN (%s)' % ','.join(['%s'] * len(recipe_ids)),
+            recipe_ids
+        )
+        
+        results = cursor.fetchall()
+        all_ingredients = []
+        
+        for result in results:
+            ingredients = json.loads(result['ingredients'])
+            all_ingredients.extend(ingredients)
+            
         cursor.close()
         conn.close()
+        
+        return jsonify({
+            'success': True,
+            'ingredients': all_ingredients
+        })
+        
+    except Exception as e:
+        print(f"Error in get_ingredients: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 if __name__ == '__main__':
     init_json()
