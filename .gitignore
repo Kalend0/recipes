@@ -1,0 +1,22 @@
+# Recipes app specific
+config.ini
+*.log
+recipes.db
+recipes.json
+flask_output.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+ENV/
+
+# IDE specific files
+.idea/
+.vscode/
+
+# OS specific files
+.DS_Store 

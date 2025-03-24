@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receptendatabase</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Receptendatabase</h1>
+        
+        <div class="card">
+            <h2>Opgeslagen Recepten</h2>
+            <div id="db-recipes-container">
+                <!-- Database recepten worden hier weergegeven -->
+                {% if recipes %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Receptnaam</th>
+                                <th>Ingrediënten</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for recipe in recipes %}
+                                <tr>
+                                    <td>{{ recipe.id }}</td>
+                                    <td>{{ recipe.name }}</td>
+                                    <td>
+                                        <ul>
+                                            {% for ingredient in recipe.ingredients %}
+                                                <li>{{ ingredient }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Geen recepten gevonden in de database.</p>
+                {% endif %}
+            </div>
+            
+            <a href="/" class="btn primary-btn">Terug naar Receptenmanager</a>
+        </div>
+    </div>
+</body>
+</html> 
