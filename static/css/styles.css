@@ -297,3 +297,113 @@ input[type="text"]:focus {
 .recipe-buttons-container::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+/* Recipe buttons - Mobile Responsiveness */
+@media (max-width: 576px) {
+    .recipe-buttons-container {
+        gap: 15px; /* Increase gap between buttons */
+    }
+
+    .recipe-button {
+        padding: 20px 15px; /* Increase vertical padding */
+        display: flex;
+        align-items: center; /* Vertically center text */
+        justify-content: center; /* Horizontally center text */
+        text-align: center; /* Ensure text is centered */
+        line-height: 1.4; /* Improve line height for better readability */
+    }
+}
+
+/* Database view specific styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.recipe-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.recipe-table th {
+    background-color: #3498db;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.recipe-table td {
+    padding: 12px;
+    vertical-align: top;
+}
+
+.recipe-col {
+    width: 40%;
+}
+
+.ingredients-col {
+    width: 40%;
+}
+
+.actions-col {
+    width: 20%;
+}
+
+.recipe-divider {
+    background-color: #f9f9f9;
+}
+
+.recipe-divider strong {
+    font-size: 1.2rem;
+    color: #2c3e50;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.mb-2 {
+    margin-bottom: 10px;
+}
+
+.recipe-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 15px;
+}
+
+/* Ensure these styles don't conflict with existing ones */
+#db-recipes-container ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+#db-recipes-container li {
+    margin-bottom: 5px;
+}

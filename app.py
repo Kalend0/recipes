@@ -212,8 +212,23 @@ def default_ingredients_route():
 def view_db():
     
     if __name__ == "__main__":
+        
         print("Running in development mode - skipping database operations")
-        return jsonify({'success': True, 'message': 'Development mode - database operations skipped'})
+        
+        # Create mock test data for the database view
+        test_recipes = [
+            {
+                'id': 1,
+                'name': 'Chocolate Cake',
+                'ingredients': ['Flour', 'Sugar', 'Cocoa', 'Eggs']
+            },
+            {
+                'id': 2,
+                'name': 'Pasta Carbonara',
+                'ingredients': ['Pasta', 'Eggs', 'Pancetta', 'Parmesan']
+            }
+        ]
+        return render_template('view_db.html', recipes=test_recipes)
     
     try:
         conn, error = get_db_connection()
@@ -291,6 +306,54 @@ def get_ingredients():
             'success': False,
             'error': str(e)
         }), 500
+
+@app.route('/delete_and_export_recipe/<int:recipe_id>', methods=['POST'])
+def delete_and_export_recipe(recipe_id):
+    """
+    Delete a recipe from the database and export it to the recipe manager JSON
+    """
+    if __name__ == "__main__":
+        print("Remove recipe button clicked. Running in development mode - skipping database operations")
+        return jsonify({'success': True, 'message': 'Development mode - database operations skipped'})
+    
+    try:
+        # Get database connection
+        conn, error = get_db_connection()
+        if error:
+            return jsonify({'success': False, 'error': error})
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Fetch the recipe details before deleting
+        cursor.execute('SELECT name, ingredients FROM recipes WHERE id = %s', (recipe_id,))
+        recipe = cursor.fetchone()
+        
+        if not recipe:
+            return jsonify({'success': False, 'error': 'Recipe not found'})
+        
+        # Delete the recipe from the database
+        cursor.execute('DELETE FROM recipes WHERE id = %s', (recipe_id,))
+        conn.commit()
+        
+        # Load existing recipes from JSON
+        recipes = get_recipes()
+        
+        # Add the deleted recipe to the JSON
+        recipes.append({
+            'name': recipe['name'],
+            'ingredients': json.loads(recipe['ingredients'])
+        })
+        
+        # Save updated recipes to JSON
+        save_recipes(recipes)
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'success': True, 'recipe': recipe})
+    except Exception as e:
+        print(f"Error in delete_and_export_recipe: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
     init_json()

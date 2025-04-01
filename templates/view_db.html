@@ -15,25 +15,34 @@
             <div id="db-recipes-container">
                 <!-- Database recepten worden hier weergegeven -->
                 {% if recipes %}
-                    <table>
+                    <table class="recipe-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Receptnaam</th>
-                                <th>Ingrediënten</th>
+                                <th colspan="2" class="recipe-col">Recept</th>
+                                <th class="actions-col">Acties</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for recipe in recipes %}
+                                <tr class="recipe-divider">
+                                    <td colspan="3">
+                                        <strong>Recept #{{ recipe.id }}: {{ recipe.name }}</strong>
+                                    </td>
+                                </tr>
                                 <tr>
-                                    <td>{{ recipe.id }}</td>
-                                    <td>{{ recipe.name }}</td>
                                     <td>
                                         <ul>
                                             {% for ingredient in recipe.ingredients %}
                                                 <li>{{ ingredient }}</li>
                                             {% endfor %}
                                         </ul>
+                                    </td>
+                                    <td></td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <button class="btn btn-primary mb-2 add-ingredient-btn" data-recipe-id="{{ recipe.id }}">Ingrediënt toevoegen</button>
+                                            <button class="btn btn-danger delete-recipe-btn" data-recipe-id="{{ recipe.id }}">Recept verwijderen</button>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -47,5 +56,56 @@
             <a href="/" class="btn primary-btn">Terug naar Receptenmanager</a>
         </div>
     </div>
+
+    {% block scripts %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Delete Recipe Button Handler
+        document.querySelectorAll('.delete-recipe-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const recipeId = this.getAttribute('data-recipe-id');
+                
+                fetch(`/delete_and_export_recipe/${recipeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Find and remove both the recipe details row and its ingredients row
+                        const currentRow = this.closest('tr');
+                        const ingredientsRow = currentRow.nextElementSibling;
+                        
+                        // Remove both rows
+                        currentRow.remove();
+                        if (ingredientsRow && ingredientsRow.querySelector('ul')) {
+                            ingredientsRow.remove();
+                        }
+                        
+                        // Refresh the page to update the recipe manager
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the recipe');
+                });
+            });
+        });
+
+        // Add Ingredient Button Handler (placeholder for now)
+        document.querySelectorAll('.add-ingredient-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const recipeId = this.getAttribute('data-recipe-id');
+                alert(`Add ingredient functionality for recipe ${recipeId} will be implemented later`);
+            });
+        });
+    });
+    </script>
+    {% endblock %}
 </body>
 </html> 
