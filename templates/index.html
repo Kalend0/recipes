@@ -26,17 +26,28 @@
 
         <!-- Ingredients text area -->
         <div class="ingredients-container">
-            <textarea id="ingredients-text" readonly placeholder="Ingrediënten verschijnen hier..."></textarea>
-            <button id="copy-button" class="copy-button">Kopieer Ingrediënten</button>
+            <div class="ingredients-header">
+                <h3>Ingrediënten</h3>
+            </div>
+            <div id="ingredients-chips" class="ingredients-chips-container">
+                <div class="empty-state" id="empty-state">Selecteer recepten om ingrediënten te zien...</div>
+            </div>
+            <div class="ingredients-actions">
+                <button id="copy-button" class="copy-button">Kopieer Ingrediënten</button>
+                <button id="clear-all-button" class="clear-all-button">Wis Alles</button>
+            </div>
         </div>
     </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const recipeButtons = document.querySelectorAll('.recipe-button');
-        const ingredientsText = document.getElementById('ingredients-text');
+        const ingredientsChips = document.getElementById('ingredients-chips');
+        const emptyState = document.getElementById('empty-state');
         const copyButton = document.getElementById('copy-button');
+        const clearAllButton = document.getElementById('clear-all-button');
         let selectedRecipes = new Set();
+        let currentIngredients = new Set(); // Track unique ingredients
 
         // Generate random gradient colors for buttons
         function getRandomGradient() {
@@ -54,22 +65,54 @@
             button.style.background = getRandomGradient();
         });
 
+        // Create ingredient chip
+        function createIngredientChip(ingredient) {
+            const chip = document.createElement('div');
+            chip.className = 'ingredient-chip';
+            chip.innerHTML = `
+                <span class="chip-text">${ingredient}</span>
+                <button class="chip-remove" data-ingredient="${ingredient}">×</button>
+            `;
+            
+            // Add remove functionality
+            const removeBtn = chip.querySelector('.chip-remove');
+            removeBtn.addEventListener('click', function() {
+                const ingredientToRemove = this.dataset.ingredient;
+                currentIngredients.delete(ingredientToRemove);
+                updateIngredientsDisplay();
+            });
+
+            return chip;
+        }
+
+        // Update ingredients display
+        function updateIngredientsDisplay() {
+            ingredientsChips.innerHTML = '';
+            
+            if (currentIngredients.size === 0) {
+                emptyState.style.display = 'block';
+                ingredientsChips.appendChild(emptyState);
+            } else {
+                emptyState.style.display = 'none';
+                Array.from(currentIngredients).sort().forEach(ingredient => {
+                    const chip = createIngredientChip(ingredient);
+                    ingredientsChips.appendChild(chip);
+                });
+            }
+        }
+
         // Toggle button state and update ingredients
         recipeButtons.forEach(button => {
             button.addEventListener('click', async function() {
-                const recipeId = this.dataset.recipeId;
+                const recipeId = parseInt(this.dataset.recipeId); // Convert string to integer
                 const recipeName = this.dataset.recipeName;
                 
                 if (selectedRecipes.has(recipeId)) {
+                    // Recipe is being deselected - remove its ingredients
                     selectedRecipes.delete(recipeId);
                     this.classList.remove('selected');
-                } else {
-                    selectedRecipes.add(recipeId);
-                    this.classList.add('selected');
-                }
-
-                // Fetch ingredients for selected recipes
-                if (selectedRecipes.size > 0) {
+                    
+                    // Fetch ingredients for this recipe to remove them
                     try {
                         const response = await fetch('/get_ingredients', {
                             method: 'POST',
@@ -77,7 +120,7 @@
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                                recipe_ids: Array.from(selectedRecipes)
+                                recipe_ids: [recipeId]
                             })
                         });
                         
@@ -91,29 +134,144 @@
                         }
                         
                         if (Array.isArray(data.ingredients)) {
-                            ingredientsText.value = data.ingredients.join('\n');
+                            // Remove these ingredients from current set
+                            data.ingredients.forEach(ingredient => {
+                                currentIngredients.delete(ingredient.trim());
+                            });
+                            updateIngredientsDisplay();
+                        }
+                    } catch (error) {
+                        console.error('Error fetching ingredients for removal:', error);
+                    }
+                } else {
+                    // Recipe is being selected - add its ingredients
+                    selectedRecipes.add(recipeId);
+                    this.classList.add('selected');
+                    
+                    // Fetch ingredients for this recipe to add them
+                    try {
+                        const response = await fetch('/get_ingredients', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                recipe_ids: [recipeId]
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        if (data.success === false) {
+                            throw new Error(data.error || 'Failed to fetch ingredients');
+                        }
+                        
+                        if (Array.isArray(data.ingredients)) {
+                            // Add these ingredients to current set
+                            data.ingredients.forEach(ingredient => {
+                                currentIngredients.add(ingredient.trim());
+                            });
+                            updateIngredientsDisplay();
                         } else {
-                            ingredientsText.value = 'Error: Unexpected data format';
+                            ingredientsChips.innerHTML = '<div class="error-message">Error: Unexpected data format</div>';
                         }
                     } catch (error) {
                         console.error('Error fetching ingredients:', error);
-                        ingredientsText.value = `Error: ${error.message}`;
+                        ingredientsChips.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
                     }
-                } else {
-                    ingredientsText.value = '';
                 }
             });
         });
 
         // Copy button functionality
         copyButton.addEventListener('click', function() {
-            ingredientsText.select();
-            document.execCommand('copy');
-            this.textContent = 'Gekopieerd!';
-            setTimeout(() => {
-                this.textContent = 'Kopieer Ingrediënten';
-            }, 2000);
+            console.log('Copy button clicked'); // Debug log
+            
+            if (currentIngredients.size === 0) {
+                console.log('No ingredients to copy'); // Debug log
+                return;
+            }
+            
+            const ingredientsList = Array.from(currentIngredients).sort().join('\n');
+            console.log('Ingredients to copy:', ingredientsList); // Debug log
+            
+            // Store the original text
+            const originalText = this.textContent;
+            console.log('Original button text:', originalText); // Debug log
+            
+            // Function to show success state
+            const showSuccess = () => {
+                this.textContent = 'Gekopieerd!';
+                this.classList.add('copied');
+                console.log('Showing success state'); // Debug log
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.classList.remove('copied');
+                    console.log('Restored original state'); // Debug log
+                }, 2000);
+            };
+            
+            // Try modern clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                console.log('Using modern clipboard API'); // Debug log
+                navigator.clipboard.writeText(ingredientsList).then(() => {
+                    console.log('Modern clipboard API succeeded'); // Debug log
+                    showSuccess();
+                }).catch((error) => {
+                    console.log('Modern clipboard API failed, trying fallback:', error); // Debug log
+                    // Fallback method
+                    fallbackCopy(ingredientsList, showSuccess);
+                });
+            } else {
+                console.log('Modern clipboard API not available, using fallback'); // Debug log
+                // Fallback method
+                fallbackCopy(ingredientsList, showSuccess);
+            }
         });
+
+        // Fallback copy method
+        function fallbackCopy(text, successCallback) {
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    console.log('Fallback copy succeeded'); // Debug log
+                    successCallback();
+                } else {
+                    console.log('Fallback copy failed'); // Debug log
+                    alert('Kopiëren mislukt. Probeer handmatig te selecteren en kopiëren.');
+                }
+            } catch (error) {
+                console.log('Fallback copy error:', error); // Debug log
+                alert('Kopiëren mislukt. Probeer handmatig te selecteren en kopiëren.');
+            }
+        }
+
+        // Clear all button functionality
+        clearAllButton.addEventListener('click', function() {
+            selectedRecipes.clear();
+            currentIngredients.clear();
+            recipeButtons.forEach(button => {
+                button.classList.remove('selected');
+            });
+            updateIngredientsDisplay();
+        });
+
+        // Initialize display
+        updateIngredientsDisplay();
     });
     </script>
 </body>
