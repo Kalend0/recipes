@@ -79,7 +79,15 @@
             removeBtn.addEventListener('click', function() {
                 const ingredientToRemove = this.dataset.ingredient;
                 currentIngredients.delete(ingredientToRemove);
-                updateIngredientsDisplay();
+                
+                // Remove just this chip instead of rebuilding all
+                chip.remove();
+                
+                // Check if we need to show empty state
+                if (currentIngredients.size === 0) {
+                    emptyState.style.display = 'block';
+                    ingredientsChips.appendChild(emptyState);
+                }
             });
 
             return chip;
