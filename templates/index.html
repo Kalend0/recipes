@@ -25,15 +25,117 @@
         </div>
 
         <!-- Ingredients text area -->
-        <div class="ingredients-container">
-            <div class="ingredients-header">
-                <h3>Ingrediënten</h3>
+        <div class="ingredients-section">
+            <div class="ingredients-container" id="general-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Algemeen</h3>
+                </div>
+                <div id="ingredients-chips-general" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-general">Selecteer recepten om ingrediënten te zien...</div>
+                </div>
             </div>
-            <div id="ingredients-chips" class="ingredients-chips-container">
-                <div class="empty-state" id="empty-state">Selecteer recepten om ingrediënten te zien...</div>
+
+            <div class="ingredients-container" id="fresh-veg-fruit-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Verse groenten en fruit</h3>
+                </div>
+                <div id="ingredients-chips-fresh-veg-fruit" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-fresh-veg-fruit">Geen ingrediënten in deze categorie.</div>
+                </div>
             </div>
+
+            <div class="ingredients-container" id="dry-canned-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Droog- en conserven</h3>
+                </div>
+                <div id="ingredients-chips-dry-canned" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-dry-canned">Geen ingrediënten in deze categorie.</div>
+                </div>
+            </div>
+
+            <div class="ingredients-container" id="bread-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Brood</h3>
+                </div>
+                <div id="ingredients-chips-bread" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-bread">Geen ingrediënten in deze categorie.</div>
+                </div>
+            </div>
+
+            <div class="ingredients-container" id="breakfast-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Ontbijt</h3>
+                </div>
+                <div id="ingredients-chips-breakfast" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-breakfast">Geen ingrediënten in deze categorie.</div>
+                </div>
+            </div>
+
+            <div class="ingredients-container" id="durable-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Houdbaar voedsel</h3>
+                </div>
+                <div id="ingredients-chips-durable" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-durable">Geen ingrediënten in deze categorie.</div>
+                </div>
+            </div>
+
+            <div class="ingredients-container" id="fresh-meat-fish-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Vers vlees en vis</h3>
+                </div>
+                <div id="ingredients-chips-fresh-meat-fish" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-fresh-meat-fish">Geen ingrediënten in deze categorie.</div>
+                </div>
+            </div>
+
+            <div class="ingredients-container" id="dairy-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Zuivelproducten</h3>
+                </div>
+                <div id="ingredients-chips-dairy" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-dairy">Geen ingrediënten in deze categorie.</div>
+                </div>
+            </div>
+
+            <div class="ingredients-container" id="non-food-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Non-food</h3>
+                </div>
+                <div id="ingredients-chips-non-food" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-non-food">Geen ingrediënten in deze categorie.</div>
+                </div>
+            </div>
+
+            <div class="ingredients-container" id="snacks-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Snacks</h3>
+                </div>
+                <div id="ingredients-chips-snacks" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-snacks">Geen ingrediënten in deze categorie.</div>
+                </div>
+            </div>
+
+            <div class="ingredients-container" id="drinks-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Dranken</h3>
+                </div>
+                <div id="ingredients-chips-drinks" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-drinks">Geen ingrediënten in deze categorie.</div>
+                </div>
+            </div>
+
+            <div class="ingredients-container" id="toppings-spreads-ingredients-container">
+                <div class="ingredients-header">
+                    <h3>Broodbeleg</h3>
+                </div>
+                <div id="ingredients-chips-toppings-spreads" class="ingredients-chips-container">
+                    <div class="empty-state" id="empty-state-toppings-spreads">Geen ingrediënten in deze categorie.</div>
+                </div>
+            </div>
+
             <div class="ingredients-actions">
-                <button id="copy-button" class="copy-button">Kopieer Ingrediënten</button>
+                <button id="copy-button" class="copy-button">Kopieer Ingrediënten (Algemeen)</button>
                 <button id="clear-all-button" class="clear-all-button">Wis Alles</button>
             </div>
         </div>
@@ -42,12 +144,30 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const recipeButtons = document.querySelectorAll('.recipe-button');
-        const ingredientsChips = document.getElementById('ingredients-chips');
-        const emptyState = document.getElementById('empty-state');
+        // Update to select the new general ingredients container and its empty state
+        const ingredientsChipsGeneral = document.getElementById('ingredients-chips-general');
+        const emptyStateGeneral = document.getElementById('empty-state-general');
+        
+        // Store all chips containers and empty states for easier management
+        const allIngredientsContainers = {
+            'general': { chips: ingredientsChipsGeneral, emptyState: emptyStateGeneral },
+            'fresh-veg-fruit': { chips: document.getElementById('ingredients-chips-fresh-veg-fruit'), emptyState: document.getElementById('empty-state-fresh-veg-fruit') },
+            'dry-canned': { chips: document.getElementById('ingredients-chips-dry-canned'), emptyState: document.getElementById('empty-state-dry-canned') },
+            'bread': { chips: document.getElementById('ingredients-chips-bread'), emptyState: document.getElementById('empty-state-bread') },
+            'breakfast': { chips: document.getElementById('ingredients-chips-breakfast'), emptyState: document.getElementById('empty-state-breakfast') },
+            'durable': { chips: document.getElementById('ingredients-chips-durable'), emptyState: document.getElementById('empty-state-durable') },
+            'fresh-meat-fish': { chips: document.getElementById('ingredients-chips-fresh-meat-fish'), emptyState: document.getElementById('empty-state-fresh-meat-fish') },
+            'dairy': { chips: document.getElementById('ingredients-chips-dairy'), emptyState: document.getElementById('empty-state-dairy') },
+            'non-food': { chips: document.getElementById('ingredients-chips-non-food'), emptyState: document.getElementById('empty-state-non-food') },
+            'snacks': { chips: document.getElementById('ingredients-chips-snacks'), emptyState: document.getElementById('empty-state-snacks') },
+            'drinks': { chips: document.getElementById('ingredients-chips-drinks'), emptyState: document.getElementById('empty-state-drinks') },
+            'toppings-spreads': { chips: document.getElementById('ingredients-chips-toppings-spreads'), emptyState: document.getElementById('empty-state-toppings-spreads') }
+        };
+
         const copyButton = document.getElementById('copy-button');
         const clearAllButton = document.getElementById('clear-all-button');
         let selectedRecipes = new Set();
-        let currentIngredients = new Set(); // Track unique ingredients
+        let currentIngredients = new Set(); // Still track all unique ingredients globally for now
 
         // Generate random gradient colors for buttons
         function getRandomGradient() {
@@ -83,11 +203,14 @@
                 // Remove just this chip instead of rebuilding all
                 chip.remove();
                 
-                // Check if we need to show empty state
-                if (currentIngredients.size === 0) {
-                    emptyState.style.display = 'block';
-                    ingredientsChips.appendChild(emptyState);
+                // Check if we need to show empty state for the general box
+                // Later this will need to check the specific box the chip was in
+                if (currentIngredients.size === 0) { // This condition might need adjustment based on categorization
+                    allIngredientsContainers['general'].emptyState.style.display = 'block';
+                    // allIngredientsContainers['general'].chips.appendChild(allIngredientsContainers['general'].emptyState);
                 }
+                // We should also call updateIngredientsDisplay to re-evaluate all boxes
+                updateIngredientsDisplay();
             });
 
             return chip;
@@ -95,17 +218,28 @@
 
         // Update ingredients display
         function updateIngredientsDisplay() {
-            ingredientsChips.innerHTML = '';
+            // Clear all containers first
+            for (const category in allIngredientsContainers) {
+                const container = allIngredientsContainers[category];
+                container.chips.innerHTML = ''; // Clear chips
+                container.emptyState.style.display = 'block'; // Show empty state
+                container.chips.appendChild(container.emptyState); // Add empty state back
+            }
             
             if (currentIngredients.size === 0) {
-                emptyState.style.display = 'block';
-                ingredientsChips.appendChild(emptyState);
+                // If no ingredients at all, ensure general empty state is prominent (or handle as per new design)
+                // The loop above already handles setting empty states for all.
             } else {
-                emptyState.style.display = 'none';
+                // For now, all ingredients go into the 'general' category
+                const generalContainer = allIngredientsContainers['general'];
+                generalContainer.emptyState.style.display = 'none';
                 Array.from(currentIngredients).sort().forEach(ingredient => {
                     const chip = createIngredientChip(ingredient);
-                    ingredientsChips.appendChild(chip);
+                    generalContainer.chips.appendChild(chip);
                 });
+
+                // For other categories, ensure their empty state is shown if they have no specific items yet.
+                // (This is handled by the initial clear and empty state display in the loop)
             }
         }
 
@@ -146,7 +280,7 @@
                             data.ingredients.forEach(ingredient => {
                                 currentIngredients.delete(ingredient.trim());
                             });
-                            updateIngredientsDisplay();
+                            updateIngredientsDisplay(); // This will now update the general box
                         }
                     } catch (error) {
                         console.error('Error fetching ingredients for removal:', error);
@@ -182,29 +316,38 @@
                             data.ingredients.forEach(ingredient => {
                                 currentIngredients.add(ingredient.trim());
                             });
-                            updateIngredientsDisplay();
+                            updateIngredientsDisplay(); // This will now update the general box
                         } else {
-                            ingredientsChips.innerHTML = '<div class="error-message">Error: Unexpected data format</div>';
+                            // Display error in the general ingredients box for now
+                            allIngredientsContainers['general'].chips.innerHTML = '<div class="error-message">Error: Unexpected data format</div>';
                         }
                     } catch (error) {
                         console.error('Error fetching ingredients:', error);
-                        ingredientsChips.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+                        // Display error in the general ingredients box for now
+                        allIngredientsContainers['general'].chips.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
                     }
                 }
             });
         });
 
-        // Copy button functionality
+        // Copy button functionality (copies from 'general' box for now)
         copyButton.addEventListener('click', function() {
-            console.log('Copy button clicked'); // Debug log
+            console.log('Copy button clicked');
             
-            if (currentIngredients.size === 0) {
-                console.log('No ingredients to copy'); // Debug log
+            // Collect ingredients from the "general" category for now
+            const ingredientsToCopy = [];
+            const generalChips = allIngredientsContainers['general'].chips.querySelectorAll('.chip-text');
+            generalChips.forEach(chipText => {
+                ingredientsToCopy.push(chipText.textContent);
+            });
+
+            if (ingredientsToCopy.length === 0) {
+                console.log('No ingredients in general to copy');
                 return;
             }
             
-            const ingredientsList = Array.from(currentIngredients).sort().join('\n');
-            console.log('Ingredients to copy:', ingredientsList); // Debug log
+            const ingredientsList = ingredientsToCopy.sort().join('\n');
+            console.log('Ingredients to copy (General):', ingredientsList);
             
             // Store the original text
             const originalText = this.textContent;
@@ -275,7 +418,7 @@
             recipeButtons.forEach(button => {
                 button.classList.remove('selected');
             });
-            updateIngredientsDisplay();
+            updateIngredientsDisplay(); // This will clear all new boxes and show their empty states.
         });
 
         // Initialize display
