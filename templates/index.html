@@ -162,7 +162,7 @@
             </div>
 
             <div class="ingredients-actions">
-                <button id="copy-button" class="copy-button">Kopieer Ingrediënten (Overig)</button>
+                <button id="copy-button" class="copy-button">Kopieer Ingrediënten</button>
                 <button id="clear-all-button" class="clear-all-button">Wis Alles</button>
             </div>
         </div>
@@ -197,7 +197,7 @@
         const copyButton = document.getElementById('copy-button');
         const clearAllButton = document.getElementById('clear-all-button');
         let selectedRecipes = new Set();
-        let currentIngredients = new Set(); // Still track all unique ingredients globally for now
+        let currentIngredients = new Map(); // Use a Map to store ingredient objects by name
 
         // Generate random gradient colors for buttons
         function getRandomGradient() {
@@ -220,26 +220,15 @@
             const chip = document.createElement('div');
             chip.className = 'ingredient-chip';
             chip.innerHTML = `
-                <span class="chip-text">${ingredient}</span>
-                <button class="chip-remove" data-ingredient="${ingredient}">×</button>
+                <span class="chip-text">${ingredient.name}</span>
+                <button class="chip-remove" data-ingredient-name="${ingredient.name}">×</button>
             `;
             
             // Add remove functionality
             const removeBtn = chip.querySelector('.chip-remove');
             removeBtn.addEventListener('click', function() {
-                const ingredientToRemove = this.dataset.ingredient;
-                currentIngredients.delete(ingredientToRemove);
-                
-                // Remove just this chip instead of rebuilding all
-                chip.remove();
-                
-                // Check if we need to show empty state for the general box
-                // Later this will need to check the specific box the chip was in
-                if (currentIngredients.size === 0) { // This condition might need adjustment based on categorization
-                    allIngredientsContainers['overig'].emptyState.style.display = 'block';
-                    // allIngredientsContainers['algemeen'].chips.appendChild(allIngredientsContainers['algemeen'].emptyState);
-                }
-                // We should also call updateIngredientsDisplay to re-evaluate all boxes
+                const ingredientName = this.dataset.ingredientName;
+                currentIngredients.delete(ingredientName);
                 updateIngredientsDisplay();
             });
 
@@ -248,32 +237,46 @@
 
         // Update ingredients display
         function updateIngredientsDisplay() {
-            // Clear all containers first
+            // Clear all chips from all containers
             for (const category in allIngredientsContainers) {
                 const container = allIngredientsContainers[category];
-                container.chips.innerHTML = ''; // Clear chips
-                container.emptyState.style.display = 'block'; // Show empty state
-                container.chips.appendChild(container.emptyState); // Add empty state back
+                container.chips.querySelectorAll('.ingredient-chip').forEach(c => c.remove());
             }
-            
-            if (currentIngredients.size === 0) {
-                // If no ingredients at all, ensure general empty state is prominent (or handle as per new design)
-                // The loop above already handles setting empty states for all.
-            } else {
-                // TODO: Implement logic to categorize ingredients based on their linked category from the database
-                // Currently all ingredients go into the 'overig' category - need to fetch ingredient categories 
-                // from the backend and distribute chips to their proper category containers
-                
-                // For now, all ingredients go into the 'overig' category
-                const generalContainer = allIngredientsContainers['overig'];
-                generalContainer.emptyState.style.display = 'none';
-                Array.from(currentIngredients).sort().forEach(ingredient => {
-                    const chip = createIngredientChip(ingredient);
-                    generalContainer.chips.appendChild(chip);
-                });
 
-                // For other categories, ensure their empty state is shown if they have no specific items yet.
-                // (This is handled by the initial clear and empty state display in the loop)
+            // Repopulate chips based on current ingredients
+            currentIngredients.forEach(ingredient => {
+                const category = ingredient.category || 'overig';
+                const containerKey = category.toLowerCase().replace(/\s+/g, '-');
+                const containerData = allIngredientsContainers[containerKey] || allIngredientsContainers['overig'];
+                
+                if (containerData) {
+                    const chip = createIngredientChip(ingredient);
+                    // Add the new chip before the empty state message
+                    containerData.chips.insertBefore(chip, containerData.emptyState);
+                }
+            });
+
+            // Update visibility of containers and empty states
+            const hasAnyIngredients = currentIngredients.size > 0;
+            for (const categoryKey in allIngredientsContainers) {
+                const mainContainer = document.getElementById(`${categoryKey}-ingredients-container`);
+                const containerData = allIngredientsContainers[categoryKey];
+                const hasChips = containerData.chips.querySelector('.ingredient-chip');
+
+                if (hasChips) {
+                    mainContainer.style.display = 'block';
+                    containerData.emptyState.style.display = 'none';
+                } else {
+                    // This container is empty
+                    if (categoryKey === 'overig' && !hasAnyIngredients) {
+                        // Special case for initial state: show the 'overig' container
+                        mainContainer.style.display = 'block';
+                        containerData.emptyState.style.display = 'block';
+                    } else {
+                        // Otherwise, hide the empty container
+                        mainContainer.style.display = 'none';
+                    }
+                }
             }
         }
 
@@ -310,11 +313,15 @@
                         }
                         
                         if (Array.isArray(data.ingredients)) {
-                            // Remove these ingredients from current set
+                            // Remove these ingredients from current map
                             data.ingredients.forEach(ingredient => {
-                                currentIngredients.delete(ingredient.trim());
+                                if(typeof ingredient === 'object' && ingredient.name) {
+                                    currentIngredients.delete(ingredient.name);
+                                } else {
+                                    currentIngredients.delete(String(ingredient));
+                                }
                             });
-                            updateIngredientsDisplay(); // This will now update the overig box
+                            updateIngredientsDisplay();
                         }
                     } catch (error) {
                         console.error('Error fetching ingredients for removal:', error);
@@ -346,11 +353,16 @@
                         }
                         
                         if (Array.isArray(data.ingredients)) {
-                            // Add these ingredients to current set
+                            // Add these ingredients to current map
                             data.ingredients.forEach(ingredient => {
-                                currentIngredients.add(ingredient.trim());
+                                if(typeof ingredient === 'object' && ingredient.name) {
+                                    currentIngredients.set(ingredient.name, ingredient);
+                                } else {
+                                    // Handle case where ingredient is just a string
+                                    currentIngredients.set(String(ingredient), { name: String(ingredient), category: 'overig' });
+                                }
                             });
-                            updateIngredientsDisplay(); // This will now update the overig box
+                            updateIngredientsDisplay();
                         } else {
                             // Display error in the overig ingredients box for now
                             allIngredientsContainers['overig'].chips.innerHTML = '<div class="error-message">Error: Unexpected data format</div>';
@@ -364,24 +376,43 @@
             });
         });
 
-        // Copy button functionality (copies from 'overig' box for now)
+        // Copy button functionality
         copyButton.addEventListener('click', function() {
             console.log('Copy button clicked');
             
-            // Collect ingredients from the "overig" category for now
-            const ingredientsToCopy = [];
-            const generalChips = allIngredientsContainers['overig'].chips.querySelectorAll('.chip-text');
-            generalChips.forEach(chipText => {
-                ingredientsToCopy.push(chipText.textContent);
-            });
-
-            if (ingredientsToCopy.length === 0) {
-                console.log('No ingredients in overig to copy');
+            if (currentIngredients.size === 0) {
+                console.log('No ingredients to copy');
                 return;
             }
-            
-            const ingredientsList = ingredientsToCopy.sort().join('\n');
-            console.log('Ingredients to copy (overig):', ingredientsList);
+
+            const ingredientsByCategory = {};
+            currentIngredients.forEach(ingredient => {
+                const categoryKey = ingredient.category || 'overig';
+                if (!ingredientsByCategory[categoryKey]) {
+                    ingredientsByCategory[categoryKey] = [];
+                }
+                ingredientsByCategory[categoryKey].push(ingredient.name);
+            });
+
+            let outputParts = [];
+            for (const categoryKey in allIngredientsContainers) {
+                if (ingredientsByCategory[categoryKey] && ingredientsByCategory[categoryKey].length > 0) {
+                    const mainContainer = document.getElementById(`${categoryKey}-ingredients-container`);
+                    const headerText = mainContainer.querySelector('.ingredients-header h3').textContent;
+                    
+                    outputParts.push(`${headerText}\n`);
+                    
+                    const sortedIngredients = ingredientsByCategory[categoryKey].sort();
+                    sortedIngredients.forEach(ingredientName => {
+                        outputParts.push(`- ${ingredientName}\n`);
+                    });
+                    
+                    outputParts.push('\n');
+                }
+            }
+
+            const ingredientsList = outputParts.join('').trim();
+            console.log('Ingredients to copy:', `\n${ingredientsList}`);
             
             // Store the original text
             const originalText = this.textContent;
