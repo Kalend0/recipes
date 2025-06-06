@@ -129,10 +129,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // TODO: The ingredient categories are being saved here, but the index.html page 
-        // still needs to be updated to use these categories when displaying ingredient chips
-        // Need to modify the /get_ingredients endpoint to return category information
-        
         // Send data to server
         try {
             const response = await fetch('/add_recipe', {
@@ -276,14 +272,50 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set default ingredients for a recipe
     async function setDefaultIngredients(recipeName) {
         const defaultIngredients = await getDefaultIngredients(recipeName);
-        const inputs = ingredientsContainer.querySelectorAll('.ingredient-input');
+
+        // Clear all existing ingredient rows before populating with new defaults.
+        const ingredientRows = ingredientsContainer.querySelectorAll('.ingredient-row');
+        ingredientRows.forEach(row => {
+            row.querySelector('.ingredient-input').value = '';
+            row.querySelector('.ingredient-category').value = '';
+        });
+
+        // If there are more default ingredients than rows, add new rows.
+        while (ingredientsContainer.querySelectorAll('.ingredient-row').length < defaultIngredients.length) {
+            addIngredientField();
+        }
         
-        // Set values for the first 4 fields (or fewer if not enough default ingredients)
-        const numToSet = Math.min(4, defaultIngredients.length, inputs.length);
+        const allIngredientRows = ingredientsContainer.querySelectorAll('.ingredient-row');
+        
+        // Populate rows with default ingredients.
+        const numToSet = Math.min(defaultIngredients.length, allIngredientRows.length);
         for (let i = 0; i < numToSet; i++) {
-            // Assuming defaultIngredients is an array of strings for now.
-            // If it becomes an array of objects, this will need to be adjusted.
-            inputs[i].value = defaultIngredients[i];
+            const ingredient = defaultIngredients[i];
+            const row = allIngredientRows[i];
+            const input = row.querySelector('.ingredient-input');
+            const select = row.querySelector('.ingredient-category');
+
+            if (typeof ingredient === 'object' && ingredient.name) {
+                input.value = ingredient.name;
+                const category = ingredient.category;
+
+                if (category && category.trim() !== '' && category.toLowerCase() !== 'n/a') {
+                    const optionExists = Array.from(select.options).some(o => o.value === category);
+                    select.value = optionExists ? category : 'overig';
+                } else {
+                    select.value = 'overig';
+                }
+            } else { // Fallback for string-based ingredients
+                input.value = String(ingredient);
+                select.value = 'overig';
+            }
+        }
+
+        // Ensure there is at least one empty ingredient field for manual entry.
+        const allInputs = Array.from(ingredientsContainer.querySelectorAll('.ingredient-input'));
+        const lastInput = allInputs[allInputs.length - 1];
+        if (lastInput && lastInput.value.trim() !== '') {
+            addIngredientField();
         }
     }
     
