@@ -120,7 +120,12 @@ class TestFlaskApp:
             json={"recipe_ids": [1, 2]}
         )
         assert response.status_code == 200
-        assert "Development mode" in response.json()["message"]
+        data = response.json()
+        assert data["success"] is True
+        assert "ingredients" in data
+        assert isinstance(data["ingredients"], list)
+        # Should contain ingredients from both recipes
+        assert len(data["ingredients"]) > 0
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

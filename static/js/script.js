@@ -58,8 +58,30 @@ document.addEventListener('DOMContentLoaded', function() {
         newInput.type = 'text';
         newInput.className = 'ingredient-input';
         newInput.placeholder = 'Enter ingredient';
+
+        const newSelect = document.createElement('select');
+        newSelect.className = 'ingredient-category';
+        newSelect.innerHTML = `
+            <option value="" selected disabled style="color: #999;">Selecteer een categorie</option>
+            <option value="verse-groenten-fruit">Verse groenten en fruit</option>
+            <option value="vlees-vis">Vlees en vis</option>
+            <option value="zuivel">Zuivel</option>
+            <option value="brood-bakkerij">Brood en bakkerij</option>
+            <option value="diepvries">Diepvries</option>
+            <option value="conserven">Conserven</option>
+            <option value="droge-waren">Droge waren</option>
+            <option value="dranken">Dranken</option>
+            <option value="snacks">Snacks</option>
+            <option value="ontbijt">Ontbijt</option>
+            <option value="broodbeleg">Broodbeleg</option>
+            <option value="baby">Baby</option>
+            <option value="kruiden">Kruiden</option>
+            <option value="non-food">Non-food</option>
+            <option value="overig">Overig</option>
+        `;
         
         newRow.appendChild(newInput);
+        newRow.appendChild(newSelect);
         ingredientsContainer.appendChild(newRow);
     }
     
@@ -93,15 +115,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Get all non-empty ingredient values
-        const ingredientInputs = ingredientsContainer.querySelectorAll('.ingredient-input');
-        const ingredients = Array.from(ingredientInputs)
-            .map(input => input.value.trim())
-            .filter(value => value !== '');
+        const ingredientRows = ingredientsContainer.querySelectorAll('.ingredient-row');
+        const ingredients = Array.from(ingredientRows)
+            .map(row => {
+                const name = row.querySelector('.ingredient-input').value.trim();
+                const category = row.querySelector('.ingredient-category').value;
+                return { name, category };
+            })
+            .filter(ingredient => ingredient.name !== '');
         
         if (ingredients.length === 0) {
             alert('Please add at least one ingredient');
             return;
         }
+        
+        // TODO: The ingredient categories are being saved here, but the index.html page 
+        // still needs to be updated to use these categories when displaying ingredient chips
+        // Need to modify the /get_ingredients endpoint to return category information
         
         // Send data to server
         try {
@@ -123,7 +153,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Clear form
                 recipeNameInput.value = '';
-                ingredientInputs.forEach(input => input.value = '');
+                ingredientRows.forEach(row => {
+                    row.querySelector('.ingredient-input').value = '';
+                    row.querySelector('.ingredient-category').value = '';
+                });
                 
                 // Reset ingredient fields
                 ingredientsContainer.innerHTML = '';
@@ -155,7 +188,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const ingredientsList = document.createElement('ul');
         ingredients.forEach(ingredient => {
             const listItem = document.createElement('li');
-            listItem.textContent = ingredient;
+            if (typeof ingredient === 'object' && ingredient.name) {
+                listItem.innerHTML = `${ingredient.name} - <em>${ingredient.category}</em>`;
+            } else {
+                listItem.textContent = ingredient;
+            }
             ingredientsList.appendChild(listItem);
         });
         
@@ -244,6 +281,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set values for the first 4 fields (or fewer if not enough default ingredients)
         const numToSet = Math.min(4, defaultIngredients.length, inputs.length);
         for (let i = 0; i < numToSet; i++) {
+            // Assuming defaultIngredients is an array of strings for now.
+            // If it becomes an array of objects, this will need to be adjusted.
             inputs[i].value = defaultIngredients[i];
         }
     }

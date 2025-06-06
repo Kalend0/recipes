@@ -117,7 +117,19 @@ def get_all_recipes():
     """Helper function to get all recipes from database"""
     if __name__ == "__main__":  # Development mode
         print("Running in development mode - using mock data")
-        return [], None
+        # Return test recipes for development
+        test_recipes = [
+            {'id': 1, 'name': 'Pannenkoeken'},
+            {'id': 2, 'name': 'Stamppot'},
+            {'id': 3, 'name': 'Erwtensoep'},
+            {'id': 4, 'name': 'Bitterballen'},
+            {'id': 5, 'name': 'Hutspot'},
+            {'id': 6, 'name': 'Poffertjes'},
+            {'id': 7, 'name': 'Appeltaart'},
+            {'id': 8, 'name': 'Pasta Carbonara'},
+            {'id': 9, 'name': 'Chocolate Cake'}
+        ]
+        return test_recipes, None
     
     conn, error = get_db_connection()
     if error:
@@ -265,9 +277,31 @@ def get_ingredients():
     # Check if running in development mode
     if __name__ == "__main__":
         print("Running in development mode - using mock data")
+        
+        data = request.get_json()
+        recipe_ids = data.get('recipe_ids', [])
+        
+        # Test recipe ingredients mapping (matches the test_recipes from get_all_recipes)
+        test_recipe_ingredients = {
+            1: ['bloem', 'melk', 'eieren', 'zout'],  # Pannenkoeken
+            2: ['aardappelen', 'boerenkool', 'rookworst', 'spekjes'],  # Stamppot
+            3: ['spliterwten', 'varkensvlees', 'prei', 'wortel'],  # Erwtensoep
+            4: ['rundvlees', 'bouillon', 'bloem', 'paneermeel'],  # Bitterballen
+            5: ['aardappelen', 'wortelen', 'uien', 'rundvlees'],  # Hutspot
+            6: ['bloem', 'gist', 'melk', 'boter'],  # Poffertjes
+            7: ['appels', 'bloem', 'boter', 'kaneel'],  # Appeltaart
+            8: ['pasta', 'eieren', 'pancetta', 'parmezaan'],  # Pasta Carbonara
+            9: ['bloem', 'suiker', 'cacao', 'eieren', 'boter']  # Chocolate Cake
+        }
+        
+        all_ingredients = []
+        for recipe_id in recipe_ids:
+            if recipe_id in test_recipe_ingredients:
+                all_ingredients.extend(test_recipe_ingredients[recipe_id])
+        
         return jsonify({
             'success': True,
-            'ingredients': ['Mock ingredient 1', 'Mock ingredient 2', 'Mock ingredient 3']
+            'ingredients': all_ingredients
         })
     
     try:
