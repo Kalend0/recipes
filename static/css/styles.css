@@ -660,7 +660,13 @@ input[type="text"]:focus {
     
     .btn-primary,
     .btn-danger {
-        padding: 6px 12px;
+        width: 100%;
+        padding: 10px;
         font-size: 0.9rem;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
