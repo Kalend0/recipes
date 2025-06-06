@@ -281,17 +281,17 @@ def get_ingredients():
         data = request.get_json()
         recipe_ids = data.get('recipe_ids', [])
         
-        # Test recipe ingredients mapping (matches the test_recipes from get_all_recipes)
+        # Test recipe ingredients mapping with categories
         test_recipe_ingredients = {
-            1: ['bloem', 'melk', 'eieren', 'zout'],  # Pannenkoeken
-            2: ['aardappelen', 'boerenkool', 'rookworst', 'spekjes'],  # Stamppot
-            3: ['spliterwten', 'varkensvlees', 'prei', 'wortel'],  # Erwtensoep
-            4: ['rundvlees', 'bouillon', 'bloem', 'paneermeel'],  # Bitterballen
-            5: ['aardappelen', 'wortelen', 'uien', 'rundvlees'],  # Hutspot
-            6: ['bloem', 'gist', 'melk', 'boter'],  # Poffertjes
-            7: ['appels', 'bloem', 'boter', 'kaneel'],  # Appeltaart
-            8: ['pasta', 'eieren', 'pancetta', 'parmezaan'],  # Pasta Carbonara
-            9: ['bloem', 'suiker', 'cacao', 'eieren', 'boter']  # Chocolate Cake
+            1: [{'name': 'bloem', 'category': 'droge-waren'}, {'name': 'melk', 'category': 'zuivel'}, {'name': 'eieren', 'category': 'zuivel'}, {'name': 'zout', 'category': 'kruiden'}],  # Pannenkoeken
+            2: [{'name': 'aardappelen', 'category': 'verse-groenten-fruit'}, {'name': 'boerenkool', 'category': 'verse-groenten-fruit'}, {'name': 'rookworst', 'category': 'vlees-vis'}, {'name': 'spekjes', 'category': 'vlees-vis'}],  # Stamppot
+            3: [{'name': 'spliterwten', 'category': 'droge-waren'}, {'name': 'varkensvlees', 'category': 'vlees-vis'}, {'name': 'prei', 'category': 'verse-groenten-fruit'}, {'name': 'wortel', 'category': 'verse-groenten-fruit'}],  # Erwtensoep
+            4: [{'name': 'rundvlees', 'category': 'vlees-vis'}, {'name': 'bouillon', 'category': 'droge-waren'}, {'name': 'bloem', 'category': 'droge-waren'}, {'name': 'paneermeel', 'category': 'brood-bakkerij'}],  # Bitterballen
+            5: [{'name': 'aardappelen', 'category': 'verse-groenten-fruit'}, {'name': 'wortelen', 'category': 'verse-groenten-fruit'}, {'name': 'uien', 'category': 'verse-groenten-fruit'}, {'name': 'rundvlees', 'category': 'vlees-vis'}],  # Hutspot
+            6: [{'name': 'bloem', 'category': 'droge-waren'}, {'name': 'gist', 'category': 'droge-waren'}, {'name': 'melk', 'category': 'zuivel'}, {'name': 'boter', 'category': 'zuivel'}],  # Poffertjes
+            7: [{'name': 'appels', 'category': 'verse-groenten-fruit'}, {'name': 'bloem', 'category': 'droge-waren'}, {'name': 'boter', 'category': 'zuivel'}, {'name': 'kaneel', 'category': 'kruiden'}],  # Appeltaart
+            8: [{'name': 'pasta', 'category': 'droge-waren'}, {'name': 'eieren', 'category': 'zuivel'}, {'name': 'pancetta', 'category': 'vlees-vis'}, {'name': 'parmezaan', 'category': 'zuivel'}],  # Pasta Carbonara
+            9: [{'name': 'bloem', 'category': 'droge-waren'}, {'name': 'suiker', 'category': 'droge-waren'}, {'name': 'cacao', 'category': 'droge-waren'}, {'name': 'eieren', 'category': 'zuivel'}, {'name': 'boter', 'category': 'zuivel'}]  # Chocolate Cake
         }
         
         all_ingredients = []
