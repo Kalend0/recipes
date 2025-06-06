@@ -237,28 +237,46 @@
 
         // Update ingredients display
         function updateIngredientsDisplay() {
-            // Clear all containers first
+            // Clear all chips from all containers
             for (const category in allIngredientsContainers) {
                 const container = allIngredientsContainers[category];
-                container.chips.innerHTML = '';
-                container.chips.appendChild(container.emptyState);
-                container.emptyState.style.display = 'block';
+                container.chips.querySelectorAll('.ingredient-chip').forEach(c => c.remove());
             }
-            
-            if (currentIngredients.size === 0) {
-                allIngredientsContainers['overig'].emptyState.textContent = 'Selecteer recepten om ingrediënten te zien...';
-            } else {
-                 currentIngredients.forEach(ingredient => {
-                    const category = ingredient.category || 'overig';
-                    const containerKey = category.toLowerCase().replace(/\s+/g, '-');
-                    const container = allIngredientsContainers[containerKey] || allIngredientsContainers['overig'];
-                    
-                    if (container) {
-                        container.emptyState.style.display = 'none';
-                        const chip = createIngredientChip(ingredient);
-                        container.chips.appendChild(chip);
+
+            // Repopulate chips based on current ingredients
+            currentIngredients.forEach(ingredient => {
+                const category = ingredient.category || 'overig';
+                const containerKey = category.toLowerCase().replace(/\s+/g, '-');
+                const containerData = allIngredientsContainers[containerKey] || allIngredientsContainers['overig'];
+                
+                if (containerData) {
+                    const chip = createIngredientChip(ingredient);
+                    // Add the new chip before the empty state message
+                    containerData.chips.insertBefore(chip, containerData.emptyState);
+                }
+            });
+
+            // Update visibility of containers and empty states
+            const hasAnyIngredients = currentIngredients.size > 0;
+            for (const categoryKey in allIngredientsContainers) {
+                const mainContainer = document.getElementById(`${categoryKey}-ingredients-container`);
+                const containerData = allIngredientsContainers[categoryKey];
+                const hasChips = containerData.chips.querySelector('.ingredient-chip');
+
+                if (hasChips) {
+                    mainContainer.style.display = 'block';
+                    containerData.emptyState.style.display = 'none';
+                } else {
+                    // This container is empty
+                    if (categoryKey === 'overig' && !hasAnyIngredients) {
+                        // Special case for initial state: show the 'overig' container
+                        mainContainer.style.display = 'block';
+                        containerData.emptyState.style.display = 'block';
+                    } else {
+                        // Otherwise, hide the empty container
+                        mainContainer.style.display = 'none';
                     }
-                });
+                }
             }
         }
 
