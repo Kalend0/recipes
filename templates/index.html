@@ -162,7 +162,7 @@
             </div>
 
             <div class="ingredients-actions">
-                <button id="copy-button" class="copy-button">Kopieer Ingrediënten (Overig)</button>
+                <button id="copy-button" class="copy-button">Kopieer Ingrediënten</button>
                 <button id="clear-all-button" class="clear-all-button">Wis Alles</button>
             </div>
         </div>
@@ -380,18 +380,39 @@
         copyButton.addEventListener('click', function() {
             console.log('Copy button clicked');
             
-            const ingredientsToCopy = [];
-            currentIngredients.forEach(ingredient => {
-                ingredientsToCopy.push(ingredient.name);
-            });
-
-            if (ingredientsToCopy.length === 0) {
+            if (currentIngredients.size === 0) {
                 console.log('No ingredients to copy');
                 return;
             }
-            
-            const ingredientsList = ingredientsToCopy.sort().join('\n');
-            console.log('Ingredients to copy:', ingredientsList);
+
+            const ingredientsByCategory = {};
+            currentIngredients.forEach(ingredient => {
+                const categoryKey = ingredient.category || 'overig';
+                if (!ingredientsByCategory[categoryKey]) {
+                    ingredientsByCategory[categoryKey] = [];
+                }
+                ingredientsByCategory[categoryKey].push(ingredient.name);
+            });
+
+            let outputParts = [];
+            for (const categoryKey in allIngredientsContainers) {
+                if (ingredientsByCategory[categoryKey] && ingredientsByCategory[categoryKey].length > 0) {
+                    const mainContainer = document.getElementById(`${categoryKey}-ingredients-container`);
+                    const headerText = mainContainer.querySelector('.ingredients-header h3').textContent;
+                    
+                    outputParts.push(`${headerText}\n`);
+                    
+                    const sortedIngredients = ingredientsByCategory[categoryKey].sort();
+                    sortedIngredients.forEach(ingredientName => {
+                        outputParts.push(`- ${ingredientName}\n`);
+                    });
+                    
+                    outputParts.push('\n');
+                }
+            }
+
+            const ingredientsList = outputParts.join('').trim();
+            console.log('Ingredients to copy:', `\n${ingredientsList}`);
             
             // Store the original text
             const originalText = this.textContent;
