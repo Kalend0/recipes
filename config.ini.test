@@ -1,0 +1,5 @@
+[MYSQL]
+HOST = localhost
+USER = test_user
+PASSWORD = test_password
+DATABASE = test_recipes_db

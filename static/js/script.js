@@ -1,10 +1,20 @@
 document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
     const recipeNameInput = document.getElementById('recipe-name');
+    const ingredientsSection = document.getElementById('ingredients-section');
     const ingredientsContainer = document.getElementById('ingredients-container');
     const addRecipeBtn = document.getElementById('add-recipe-btn');
     const recipesContainer = document.getElementById('recipes-container');
     const saveDbBtn = document.getElementById('save-db-btn');
+    
+    // Show/hide ingredients section based on recipe name input
+    recipeNameInput.addEventListener('input', () => {
+        if (recipeNameInput.value.trim() !== '') {
+            ingredientsSection.style.display = 'block';
+        } else {
+            ingredientsSection.style.display = 'none';
+        }
+    });
     
     // Initialize ingredient fields
     initIngredientFields();
@@ -147,12 +157,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Add recipe to UI
                 addRecipeToUI(recipeName, ingredients, document.querySelectorAll('.recipe-item').length);
                 
-                // Clear form
+                // Clear form, hide ingredients section, and reset fields
                 recipeNameInput.value = '';
-                ingredientRows.forEach(row => {
-                    row.querySelector('.ingredient-input').value = '';
-                    row.querySelector('.ingredient-category').value = '';
-                });
+                ingredientsSection.style.display = 'none';
                 
                 // Reset ingredient fields
                 ingredientsContainer.innerHTML = '';
