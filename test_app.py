@@ -5,6 +5,12 @@ import os
 import subprocess
 import pytest
 
+# Define paths relative to this script to avoid CWD issues with pytest
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(SCRIPT_DIR, "config.ini")
+CONFIG_TEST_PATH = os.path.join(SCRIPT_DIR, "config.ini.test")
+RECIPES_JSON_PATH = os.path.join(SCRIPT_DIR, "recipes.json")
+
 def setup_test_env():
     """Set up test environment with mock config"""
     # Create test config if it doesn't exist
@@ -32,7 +38,8 @@ class TestFlaskApp:
         cls.flask_process = subprocess.Popen(
             ["python3", "app.py"],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
+            cwd=SCRIPT_DIR
         )
         # Give the app time to start
         time.sleep(2)
@@ -45,6 +52,12 @@ class TestFlaskApp:
         cls.flask_process.terminate()
         cls.flask_process.wait()
 
+    def setup_method(self, method):
+        """Setup that runs before each test"""
+        # Clean up recipes.json before each test
+        with open(RECIPES_JSON_PATH, "w") as f:
+            json.dump([], f)
+
     def test_01_index_page(self):
         """Test the main page (recipe selector) loads"""
         response = requests.get(self.base_url)
@@ -54,7 +67,7 @@ class TestFlaskApp:
 
     def test_02_manager_page(self):
         """Test the recipe manager page loads"""
-        response = requests.get(f"{self.base_url}/manager")
+        response = requests.get(f"{self.base_url}/recipe_manager")
         assert response.status_code == 200
         assert "Receptenmanager" in response.text
 
@@ -70,20 +83,29 @@ class TestFlaskApp:
         assert response.json()["success"] is True
 
         # Verify it was saved to JSON
-        with open("recipes.json", "r") as f:
+        with open(RECIPES_JSON_PATH, "r") as f:
             recipes = json.load(f)
-        assert len(recipes) > 0
+        assert len(recipes) == 1
         assert recipes[0]["name"] == "Test Recipe"
         assert len(recipes[0]["ingredients"]) == 3
 
     def test_04_delete_recipe(self):
         """Test deleting a recipe"""
+        # Add a recipe to be deleted
+        recipe_data = {
+            "name": "Recipe to Delete",
+            "ingredients": ["A", "B"]
+        }
+        add_response = requests.post(f"{self.base_url}/add_recipe", json=recipe_data)
+        assert add_response.status_code == 200
+
+        # Now, delete the recipe
         response = requests.delete(f"{self.base_url}/delete_recipe/0")
         assert response.status_code == 200
         assert response.json()["success"] is True
 
         # Verify it was deleted from JSON
-        with open("recipes.json", "r") as f:
+        with open(RECIPES_JSON_PATH, "r") as f:
             recipes = json.load(f)
         assert len(recipes) == 0
 
