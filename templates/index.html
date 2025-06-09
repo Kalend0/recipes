@@ -4,166 +4,201 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recepten Ingrediënten Selector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body {
+            padding: 0 !important;
+            display: block !important;
+            align-items: unset !important;
+            justify-content: unset !important;
+        }
+        .main-content {
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Link to main recipe page -->
-        <div class="main-link-container">
-            <a href="{{ url_for('recipe_manager') }}" class="main-link">Naar receptenbeheer</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('index') }}">Boodschappen</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Navigatie
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="{{ url_for('index') }}">Recepten Selector</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('recipe_manager') }}">Receptenbeheer</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('view_db') }}">Database Bekijken</a></li>
+              </ul>
+            </li>
+          </ul>
         </div>
+      </div>
+    </nav>
+    <div class="main-content">
+        <div class="container">
+            <h1>Selecteer recepten</h1>
 
-        <h1>Selecteer recepten</h1>
-
-        <!-- Recipe buttons container -->
-        <div class="recipe-buttons-container">
-            {% for recipe in recipes %}
-            <button class="recipe-button" data-recipe-id="{{ recipe.id }}" data-recipe-name="{{ recipe.name }}">
-                {{ recipe.name }}
-            </button>
-            {% endfor %}
-        </div>
-
-        <!-- Ingredients text area -->
-        <div class="ingredients-section">
-            <div class="ingredients-container" id="verse-groenten-fruit-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Verse groenten en fruit</h3>
-                </div>
-                <div id="ingredients-chips-verse-groenten-fruit" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-verse-groenten-fruit">Geen ingrediënten in deze categorie.</div>
-                </div>
+            <!-- Recipe buttons container -->
+            <div class="recipe-buttons-container">
+                {% for recipe in recipes %}
+                <button class="recipe-button" data-recipe-id="{{ recipe.id }}" data-recipe-name="{{ recipe.name }}">
+                    {{ recipe.name }}
+                </button>
+                {% endfor %}
             </div>
 
-            <div class="ingredients-container" id="vlees-vis-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Vlees en vis</h3>
+            <!-- Ingredients text area -->
+            <div class="ingredients-section">
+                <div class="ingredients-container" id="verse-groenten-fruit-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Verse groenten en fruit</h3>
+                    </div>
+                    <div id="ingredients-chips-verse-groenten-fruit" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-verse-groenten-fruit">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-vlees-vis" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-vlees-vis">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="zuivel-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Zuivel</h3>
+                <div class="ingredients-container" id="vlees-vis-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Vlees en vis</h3>
+                    </div>
+                    <div id="ingredients-chips-vlees-vis" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-vlees-vis">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-zuivel" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-zuivel">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="brood-bakkerij-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Brood en bakkerij</h3>
+                <div class="ingredients-container" id="zuivel-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Zuivel</h3>
+                    </div>
+                    <div id="ingredients-chips-zuivel" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-zuivel">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-brood-bakkerij" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-brood-bakkerij">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="diepvries-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Diepvries</h3>
+                <div class="ingredients-container" id="brood-bakkerij-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Brood en bakkerij</h3>
+                    </div>
+                    <div id="ingredients-chips-brood-bakkerij" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-brood-bakkerij">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-diepvries" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-diepvries">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="conserven-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Conserven</h3>
+                <div class="ingredients-container" id="diepvries-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Diepvries</h3>
+                    </div>
+                    <div id="ingredients-chips-diepvries" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-diepvries">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-conserven" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-conserven">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="droge-waren-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Droge waren</h3>
+                <div class="ingredients-container" id="conserven-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Conserven</h3>
+                    </div>
+                    <div id="ingredients-chips-conserven" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-conserven">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-droge-waren" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-droge-waren">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="dranken-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Dranken</h3>
+                <div class="ingredients-container" id="droge-waren-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Droge waren</h3>
+                    </div>
+                    <div id="ingredients-chips-droge-waren" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-droge-waren">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-dranken" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-dranken">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="snacks-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Snacks</h3>
+                <div class="ingredients-container" id="dranken-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Dranken</h3>
+                    </div>
+                    <div id="ingredients-chips-dranken" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-dranken">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-snacks" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-snacks">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="ontbijt-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Ontbijt</h3>
+                <div class="ingredients-container" id="snacks-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Snacks</h3>
+                    </div>
+                    <div id="ingredients-chips-snacks" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-snacks">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-ontbijt" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-ontbijt">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="broodbeleg-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Broodbeleg</h3>
+                <div class="ingredients-container" id="ontbijt-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Ontbijt</h3>
+                    </div>
+                    <div id="ingredients-chips-ontbijt" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-ontbijt">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-broodbeleg" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-broodbeleg">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="baby-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Baby</h3>
+                <div class="ingredients-container" id="broodbeleg-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Broodbeleg</h3>
+                    </div>
+                    <div id="ingredients-chips-broodbeleg" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-broodbeleg">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-baby" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-baby">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="kruiden-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Kruiden</h3>
+                <div class="ingredients-container" id="baby-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Baby</h3>
+                    </div>
+                    <div id="ingredients-chips-baby" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-baby">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-kruiden" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-kruiden">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="non-food-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Non-food</h3>
+                <div class="ingredients-container" id="kruiden-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Kruiden</h3>
+                    </div>
+                    <div id="ingredients-chips-kruiden" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-kruiden">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-non-food" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-non-food">Geen ingrediënten in deze categorie.</div>
-                </div>
-            </div>
 
-            <div class="ingredients-container" id="overig-ingredients-container">
-                <div class="ingredients-header">
-                    <h3>Overig</h3>
+                <div class="ingredients-container" id="non-food-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Non-food</h3>
+                    </div>
+                    <div id="ingredients-chips-non-food" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-non-food">Geen ingrediënten in deze categorie.</div>
+                    </div>
                 </div>
-                <div id="ingredients-chips-overig" class="ingredients-chips-container">
-                    <div class="empty-state" id="empty-state-overig">Selecteer recepten om ingrediënten te zien...</div>
-                </div>
-            </div>
 
-            <div class="ingredients-actions">
-                <button id="copy-button" class="copy-button">Kopieer Ingrediënten</button>
-                <button id="clear-all-button" class="clear-all-button">Wis Alles</button>
+                <div class="ingredients-container" id="overig-ingredients-container">
+                    <div class="ingredients-header">
+                        <h3>Overig</h3>
+                    </div>
+                    <div id="ingredients-chips-overig" class="ingredients-chips-container">
+                        <div class="empty-state" id="empty-state-overig">Selecteer recepten om ingrediënten te zien...</div>
+                    </div>
+                </div>
+
+                <div class="ingredients-actions">
+                    <button id="copy-button" class="copy-button">Kopieer Ingrediënten</button>
+                    <button id="clear-all-button" class="clear-all-button">Wis Alles</button>
+                </div>
             </div>
         </div>
     </div>
@@ -490,5 +525,6 @@
         updateIngredientsDisplay();
     });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -4,80 +4,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receptendatabase</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body {
+            padding: 0 !important;
+            display: block !important;
+            align-items: unset !important;
+            justify-content: unset !important;
+        }
+        .main-content {
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Receptendatabase</h1>
-        
-        <div class="card">
-            <h2>Opgeslagen Recepten</h2>
-            <div id="db-recipes-container">
-                <!-- Database recepten worden hier weergegeven -->
-                {% if recipes %}
-                    <table class="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th scope="col">Ingrediënt</th>
-                                <th scope="col">Categorie</th>
-                                <th scope="col">Acties</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for recipe in recipes %}
-                                <tr class="recipe-divider">
-                                    <td colspan="3">
-                                        <strong>Recept #{{ recipe.id }}: {{ recipe.name }}</strong>
-                                    </td>
-                                </tr>
-                                {% if recipe.ingredients %}
-                                    {% for ingredient in recipe.ingredients %}
-                                    <tr>
-                                        <td>
-                                            {% if ingredient is mapping and ingredient.name %}
-                                                {{ ingredient.name }}
-                                            {% else %}
-                                                {{ ingredient }}
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if ingredient is mapping and ingredient.category %}
-                                                {{ ingredient.category }}
-                                            {% else %}
-                                                N/A
-                                            {% endif %}
-                                        </td>
-                                        {% if loop.first %}
-                                        <td rowspan="{{ recipe.ingredients|length }}">
-                                            <div class="d-flex flex-column">
-                                                <button class="btn btn-primary mb-2 add-ingredient-btn" data-recipe-id="{{ recipe.id }}">Ingrediënt toevoegen</button>
-                                                <button class="btn btn-danger delete-recipe-btn" data-recipe-id="{{ recipe.id }}">Recept verwijderen</button>
-                                            </div>
-                                        </td>
-                                        {% endif %}
-                                    </tr>
-                                    {% endfor %}
-                                {% else %}
-                                    <tr>
-                                        <td>Geen ingrediënten voor dit recept.</td>
-                                        <td></td>
-                                        <td>
-                                            <div class="d-flex flex-column">
-                                                <button class="btn btn-primary mb-2 add-ingredient-btn" data-recipe-id="{{ recipe.id }}">Ingrediënt toevoegen</button>
-                                                <button class="btn btn-danger delete-recipe-btn" data-recipe-id="{{ recipe.id }}">Recept verwijderen</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <p>Geen recepten gevonden in de database.</p>
-                {% endif %}
-            </div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('index') }}">Boodschappen</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Navigatie
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="{{ url_for('index') }}">Recepten Selector</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('recipe_manager') }}">Receptenbeheer</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('view_db') }}">Database Bekijken</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="main-content">
+        <div class="container">
+            <h1>Receptendatabase</h1>
             
-            <a href="/" class="btn primary-btn">Terug naar Receptenmanager</a>
+            <div class="card">
+                <h2>Opgeslagen Recepten</h2>
+                <div id="db-recipes-container">
+                    <!-- Database recepten worden hier weergegeven -->
+                    {% if recipes %}
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Ingrediënt</th>
+                                    <th scope="col">Categorie</th>
+                                    <th scope="col">Acties</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for recipe in recipes %}
+                                    <tr class="recipe-divider">
+                                        <td colspan="3">
+                                            <strong>Recept #{{ recipe.id }}: {{ recipe.name }}</strong>
+                                        </td>
+                                    </tr>
+                                    {% if recipe.ingredients %}
+                                        {% for ingredient in recipe.ingredients %}
+                                        <tr>
+                                            <td>
+                                                {% if ingredient is mapping and ingredient.name %}
+                                                    {{ ingredient.name }}
+                                                {% else %}
+                                                    {{ ingredient }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if ingredient is mapping and ingredient.category %}
+                                                    {{ ingredient.category }}
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </td>
+                                            {% if loop.first %}
+                                            <td rowspan="{{ recipe.ingredients|length }}">
+                                                <div class="d-flex flex-column">
+                                                    <button class="btn btn-primary mb-2 add-ingredient-btn" data-recipe-id="{{ recipe.id }}">Ingrediënt toevoegen</button>
+                                                    <button class="btn btn-danger delete-recipe-btn" data-recipe-id="{{ recipe.id }}">Recept verwijderen</button>
+                                                </div>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td>Geen ingrediënten voor dit recept.</td>
+                                            <td></td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <button class="btn btn-primary mb-2 add-ingredient-btn" data-recipe-id="{{ recipe.id }}">Ingrediënt toevoegen</button>
+                                                    <button class="btn btn-danger delete-recipe-btn" data-recipe-id="{{ recipe.id }}">Recept verwijderen</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>Geen recepten gevonden in de database.</p>
+                    {% endif %}
+                </div>
+                
+            </div>
         </div>
     </div>
 
@@ -130,6 +169,7 @@
         });
     });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% endblock %}
 </body>
 </html> 
