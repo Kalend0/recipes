@@ -58,28 +58,16 @@
                 
                 <div id="ingredients-section" style="display: none;">
                     <h3>Ingrediënten:</h3>
-                    <div id="ingredients-container">
+                    <div id="ingredients-container" data-categories='{{ categories | tojson | e }}'>
                         <!-- Ingredient fields will be added here dynamically -->
                         {% for i in range(5) %}
                             <div class="ingredient-row">
                                 <input type="text" class="ingredient-input" placeholder="Voer ingrediënt in">
                                 <select class="ingredient-category">
                                     <option value="" selected disabled style="color: #999;">Selecteer een categorie</option>
-                                    <option value="droge-waren">Droge waren</option>
-                                    <option value="verse-groenten-fruit">Verse groenten en fruit</option>
-                                    <option value="vlees-vis">Vlees en vis</option>
-                                    <option value="zuivel">Zuivel</option>
-                                    <option value="brood-bakkerij">Brood en bakkerij</option>
-                                    <option value="diepvries">Diepvries</option>
-                                    <option value="conserven">Conserven</option>
-                                    <option value="dranken">Dranken</option>
-                                    <option value="snacks">Snacks</option>
-                                    <option value="ontbijt">Ontbijt</option>
-                                    <option value="broodbeleg">Broodbeleg</option>
-                                    <option value="baby">Baby</option>
-                                    <option value="kruiden">Kruiden</option>
-                                    <option value="non-food">Non-food</option>
-                                    <option value="overig">Overig</option>
+                                    {% for value, name in categories.items() %}
+                                    <option value="{{ value }}">{{ name }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                         {% endfor %}
@@ -101,7 +89,7 @@
                                     {% for ingredient in recipe.ingredients %}
                                         <li>
                                             {% if ingredient.name %}
-                                                {{ ingredient.name }} - <em>{{ ingredient.category }}</em>
+                                                {{ ingredient.name }} - <em>{{ categories.get(ingredient.category, ingredient.category) }}</em>
                                             {% else %}
                                                 {{ ingredient }}
                                             {% endif %}
