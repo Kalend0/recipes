@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const recipesContainer = document.getElementById('recipes-container');
     const saveDbBtn = document.getElementById('save-db-btn');
     
+    // Get categories from data attribute
+    const categories = JSON.parse(ingredientsContainer.dataset.categories || '{}');
+    
     // Show/hide ingredients section based on recipe name input
     recipeNameInput.addEventListener('input', () => {
         if (recipeNameInput.value.trim() !== '') {
@@ -71,24 +74,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const newSelect = document.createElement('select');
         newSelect.className = 'ingredient-category';
-        newSelect.innerHTML = `
-            <option value="" selected disabled style="color: #999;">Selecteer een categorie</option>
-            <option value="verse-groenten-fruit">Verse groenten en fruit</option>
-            <option value="vlees-vis">Vlees en vis</option>
-            <option value="zuivel">Zuivel</option>
-            <option value="brood-bakkerij">Brood en bakkerij</option>
-            <option value="diepvries">Diepvries</option>
-            <option value="conserven">Conserven</option>
-            <option value="droge-waren">Droge waren</option>
-            <option value="dranken">Dranken</option>
-            <option value="snacks">Snacks</option>
-            <option value="ontbijt">Ontbijt</option>
-            <option value="broodbeleg">Broodbeleg</option>
-            <option value="baby">Baby</option>
-            <option value="kruiden">Kruiden</option>
-            <option value="non-food">Non-food</option>
-            <option value="overig">Overig</option>
-        `;
+        
+        let optionsHTML = `<option value="" selected disabled style="color: #999;">Selecteer een categorie</option>`;
+        for (const [value, name] of Object.entries(categories)) {
+            optionsHTML += `<option value="${value}">${name}</option>`;
+        }
+        newSelect.innerHTML = optionsHTML;
         
         newRow.appendChild(newInput);
         newRow.appendChild(newSelect);
@@ -192,7 +183,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ingredients.forEach(ingredient => {
             const listItem = document.createElement('li');
             if (typeof ingredient === 'object' && ingredient.name) {
-                listItem.innerHTML = `${ingredient.name} - <em>${ingredient.category}</em>`;
+                const categoryName = categories[ingredient.category] || ingredient.category;
+                listItem.innerHTML = `${ingredient.name} - <em>${categoryName}</em>`;
             } else {
                 listItem.textContent = ingredient;
             }

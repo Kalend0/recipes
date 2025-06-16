@@ -149,5 +149,71 @@ class TestFlaskApp:
         # Should contain ingredients from both recipes
         assert len(data["ingredients"]) > 0
 
+    def test_08_bootstrap_navbar_functionality(self):
+        """Test the functioning of the bootstrap navbar across different pages"""
+        # Test navbar on index page
+        response = requests.get(self.base_url)
+        assert response.status_code == 200
+        
+        # Check for essential navbar components
+        assert 'class="navbar navbar-expand-lg navbar-dark bg-dark"' in response.text
+        assert 'class="navbar-brand"' in response.text
+        assert 'Boodschappen' in response.text
+        assert 'class="navbar-toggler"' in response.text
+        assert 'data-bs-toggle="collapse"' in response.text
+        assert 'data-bs-target="#navbarNavDropdown"' in response.text
+        
+        # Check for dropdown menu
+        assert 'class="nav-item dropdown"' in response.text
+        assert 'nav-link dropdown-toggle' in response.text
+        assert 'role="button"' in response.text
+        assert 'data-bs-toggle="dropdown"' in response.text
+        assert 'Navigatie' in response.text  # Dropdown button text
+        
+        # Check for dropdown menu items with correct URLs
+        assert 'class="dropdown-menu"' in response.text
+        assert 'class="dropdown-item"' in response.text
+        assert 'Recepten Selector' in response.text
+        assert 'Receptenbeheer' in response.text
+        assert 'Database Bekijken' in response.text
+        
+        # Test navbar on recipe manager page
+        response = requests.get(f"{self.base_url}/recipe_manager")
+        assert response.status_code == 200
+        
+        # Check that navbar is present with same structure
+        assert 'class="navbar navbar-expand-lg navbar-dark bg-dark"' in response.text
+        assert 'class="navbar-brand"' in response.text
+        assert 'Boodschappen' in response.text
+        assert 'class="dropdown-menu"' in response.text
+        assert 'nav-link dropdown-toggle' in response.text
+        
+        # Check Bootstrap CSS and JS are loaded on both pages
+        assert 'bootstrap@5.3.0/dist/css/bootstrap.min.css' in response.text
+        assert 'bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js' in response.text
+        
+        # Test that the collapsible navbar structure is consistent
+        index_response = requests.get(self.base_url)
+        manager_response = requests.get(f"{self.base_url}/recipe_manager")
+        
+        # Both pages should have the same navbar structure
+        for resp in [index_response, manager_response]:
+            assert 'collapse navbar-collapse' in resp.text
+            assert 'id="navbarNavDropdown"' in resp.text
+            assert 'aria-controls="navbarNavDropdown"' in resp.text
+            assert 'navbar-toggler-icon' in resp.text
+        
+        # Test that all navbar navigation links are accessible
+        view_db_response = requests.get(f"{self.base_url}/view_db")
+        assert view_db_response.status_code == 200
+        assert 'Bootstrap' in view_db_response.text or 'bootstrap' in view_db_response.text
+        
+        # Verify navbar brand link functionality (should always go to index)
+        navbar_brand_response = requests.get(self.base_url)
+        assert navbar_brand_response.status_code == 200
+        assert 'Selecteer recepten' in navbar_brand_response.text
+        
+        print("Bootstrap navbar functionality test passed successfully")
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

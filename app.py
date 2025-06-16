@@ -34,6 +34,25 @@ db_config = {
     'database': config['MYSQL']['DATABASE']
 }
 
+# Ingredient category mapping
+INGREDIENT_CATEGORIES = {
+    "droge-waren": "Droge waren",
+    "verse-groenten-fruit": "Verse groenten en fruit",
+    "vlees-vis": "Vlees en vis",
+    "zuivel": "Zuivel",
+    "brood-bakkerij": "Brood en bakkerij",
+    "diepvries": "Diepvries",
+    "conserven": "Conserven",
+    "dranken": "Dranken",
+    "snacks": "Snacks",
+    "ontbijt": "Ontbijt",
+    "broodbeleg": "Broodbeleg",
+    "baby": "Baby",
+    "kruiden": "Kruiden",
+    "non-food": "Non-food",
+    "overig": "Overig"
+}
+
 # Helper function for database connections
 def get_db_connection():
     """Get a database connection"""
@@ -158,7 +177,7 @@ def index():
 def recipe_manager():
     """Route for the recipe manager page"""
     recipes = get_recipes()
-    return render_template('recipe_manager.html', recipes=recipes)
+    return render_template('recipe_manager.html', recipes=recipes, categories=INGREDIENT_CATEGORIES)
 
 @app.route('/add_recipe', methods=['POST'])
 def add_recipe():
